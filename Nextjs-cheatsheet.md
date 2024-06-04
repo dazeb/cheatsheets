@@ -993,6 +993,174 @@ export default function handler(req, res) {
   res.status(200).json({ message: 'Hello, Next.js!' });
 }
 ```
+### API Routes in Next.js
+
+API routes in Next.js allow you to build your API endpoints directly within the Next.js application. This simplifies backend development by keeping the frontend and backend parts of your application in one place. Here’s an in-depth look at how to use API routes in Next.js.
+
+### Setting Up API Routes
+
+To create an API route, add a JavaScript or TypeScript file to the `pages/api` directory. Each file in this directory will automatically map to `/api/*`.
+
+#### Example: Creating a Simple API Route
+```javascript
+// File: pages/api/hello.js
+
+export default function handler(req, res) {
+  // Setting HTTP status and returning JSON response
+  res.status(200).json({ message: 'Hello, Next.js!' });
+}
+```
+This API route can be accessed at `/api/hello`.
+
+### Handling HTTP Methods
+
+API routes can handle various HTTP methods (`GET`, `POST`, `PUT`, `DELETE`, etc.). Use the `req.method` property to determine the HTTP method and respond accordingly.
+
+#### Example: Handling Different HTTP Methods
+```javascript
+// File: pages/api/user.js
+
+export default function handler(req, res) {
+  const { method } = req;
+
+  switch (method) {
+    case 'GET':
+      // Handle GET request
+      res.status(200).json({ message: 'GET request received' });
+      break;
+    case 'POST':
+      // Handle POST request
+      const data = req.body;
+      res.status(201).json({ message: 'User created', data });
+      break;
+    case 'PUT':
+      // Handle PUT request
+      res.status(200).json({ message: 'User updated' });
+      break;
+    case 'DELETE':
+      // Handle DELETE request
+      res.status(204).json({ message: 'User deleted' });
+      break;
+    default:
+      // Handle any unsupported methods
+      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+      res.status(405).end(`Method ${method} Not Allowed`);
+  }
+}
+```
+
+### Dynamic API Routes
+
+Next.js API routes can also be dynamic, similar to dynamic pages. Create dynamic API routes by using brackets in the file name.
+
+#### Example: Dynamic Route
+```javascript
+// File: pages/api/user/[id].js
+
+export default function handler(req, res) {
+  const { id } = req.query;
+
+  // Handling different HTTP methods
+  if (req.method === 'GET') {
+    // Fetch user by ID
+    res.status(200).json({ message: `User ID: ${id}` });
+  } else {
+    res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+}
+```
+This API route can be accessed at `/api/user/[id]` where `[id]` is dynamic.
+
+### Middleware and Helpers
+
+#### Using Middleware
+
+You can apply middleware to API routes to handle common tasks like authentication, logging, rate limiting, etc.
+
+#### Example: Middleware
+```javascript
+// File: utils/middleware.js
+
+export function authMiddleware(req, res, next) {
+  if (!req.headers.authorization) {
+    return res.status(403).json({ message: 'Unauthorized' });
+  }
+  next();
+}
+
+// File: pages/api/protected.js
+import { authMiddleware } from '../../utils/middleware';
+
+export default function handler(req, res) {
+  authMiddleware(req, res, () => {
+    res.status(200).json({ message: 'Protected content' });
+  });
+}
+```
+
+### Error Handling
+
+Proper error handling ensures that your API routes are robust and provide meaningful feedback to clients.
+
+#### Example: Error Handling
+```javascript
+// File: pages/api/products.js
+
+export default async function handler(req, res) {
+  try {
+    if (req.method !== 'GET') {
+      throw new Error('Only GET requests are allowed');
+    }
+
+    const products = await fetchProductsFromDatabase();
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+```
+
+### Environment Variables
+
+Next.js allows you to use environment variables in your API routes. Create a `.env.local` file for development-specific variables and access them using `process.env`.
+
+#### Example: Using Environment Variables
+```javascript
+// .env.local
+DATABASE_URL=my-database-url
+
+// File: pages/api/config.js
+export default function handler(req, res) {
+  const dbUrl = process.env.DATABASE_URL;
+  res.status(200).json({ dbUrl });
+}
+```
+
+### API Route Configuration
+
+Using the `config` object, you can specify various configurations for API routes, such as disabling body parsing for file uploads.
+
+#### Example: Disabling Body Parsing
+```javascript
+// File: pages/api/file-upload.js
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default function handler(req, res) {
+  // Handle raw body (e.g., for file upload)
+  res.status(200).json({ message: 'File upload endpoint' });
+}
+```
+
+### Conclusion
+
+API routes in Next.js provide a powerful and flexible way to build your server-side logic directly within your Next.js application. They support handling different HTTP methods, dynamic routing, middleware application, and robust error handling. Understanding and leveraging these capabilities will enable you to build efficient and scalable backends.
+
+---
 
 #### Data Fetching
 ```javascript
